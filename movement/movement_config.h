@@ -1,16 +1,20 @@
-# backup
-cp movement/movement_config.h movement/movement_config.h.bak
+/*
+ * Minimal movement_config.h for a single-face firmware
+ * (Loose 50-year countdown face only)
+ */
 
-# ensure the faces header is included (safe if duplicated)
-grep -q 'movement_faces.h' movement/movement_config.h || \
-sed -i '1i #include "movement_faces.h"' movement/movement_config.h
+#ifndef MOVEMENT_CONFIG_H_
+#define MOVEMENT_CONFIG_H_
 
-# replace the faces array with just our face
-perl -0777 -i -pe 's/const\s+watch_face_t\s+watch_faces\[\]\s*=\s*\{[^}]*\};/const watch_face_t watch_faces[] = {\n    loose_countdown_face,\n};/s' movement/movement_config.h
+#include "movement_faces.h"
 
-# ensure the secondary index is 0 (create if missing)
-if grep -q "MOVEMENT_SECONDARY_FACE_INDEX" movement/movement_config.h; then
-  sed -i 's/#define\s\+MOVEMENT_SECONDARY_FACE_INDEX\s\+.*/#define MOVEMENT_SECONDARY_FACE_INDEX 0/' movement/movement_config.h
-else
-  printf '\n#define MOVEMENT_SECONDARY_FACE_INDEX 0\n' >> movement/movement_config.h
-fi
+/* The only face in the firmware */
+static const watch_face_t watch_faces[] = {
+    loose_countdown_face,
+};
+
+/* Required indices/macros */
+#define MOVEMENT_NUM_FACES            (sizeof(watch_faces) / sizeof(watch_face_t))
+#define MOVEMENT_SECONDARY_FACE_INDEX 0
+
+#endif /* MOVEMENT_CONFIG_H_ */
